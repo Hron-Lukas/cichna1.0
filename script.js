@@ -164,12 +164,13 @@ const FLOOR_CONFIGS = [
       { name: 'U22', type: 'classroom', width: 8 },
       { name: 'U23', type: 'classroom', width: 9 },
       { name: 'U24', type: 'classroom', width: 9 },
+      { name: 'K9', type: 'cabinet', width: 7, teacher: 'VČ', aggression: 'mild', shout: 'KDE JE PŘEZUTÍ' },
     ],
     bottom: [
       { name: 'U25', type: 'classroom', width: 9 },
       { name: 'U26', type: 'classroom', width: 8 },
       { name: 'U27', type: 'classroom', width: 8 },
-      { name: 'K4', type: 'cabinet', width: 7, teacher: 'DM', aggression: 'mild' },
+      { name: 'K4', type: 'cabinet', width: 7, teacher: 'DM', aggression: 'mild', shout: 'DANEEEE' },
       { name: 'U28', type: 'classroom', width: 9 },
       { name: 'U29', type: 'classroom', width: 9 },
     ],
@@ -370,6 +371,7 @@ function carveRoomSide(tiles, roomDefinitions, side, floorIndex) {
       side,
       width,
       teacher: definition.teacher || null,
+      shoutText: definition.shout || null,
       aggression: AGGRESSION[definition.aggression]
         ? definition.aggression
         : 'aggressive',
@@ -451,6 +453,7 @@ function createTeachers(floorMap) {
       return {
         id: `teacher-${room.key}`,
         name: room.teacher || 'Učitel',
+        shoutText: room.shoutText,
         aggression: room.aggression,
         detectionRange: AGGRESSION[room.aggression].detectionRange,
         roomKey: room.key,
@@ -1842,7 +1845,32 @@ function drawTeacher(enemy) {
   ctx.textBaseline = 'middle';
   ctx.fillText(enemy.name, 0, tagY + tagHeight / 2 + 0.5);
 
-  if (chasing) {
+  if (chasing && enemy.shoutText) {
+    ctx.font = '900 8px "Segoe UI", sans-serif';
+    const shoutWidth = Math.ceil(ctx.measureText(enemy.shoutText).width);
+    const bubbleWidth = Math.max(36, shoutWidth + 16);
+    const bubbleHeight = 18;
+    const bubbleY = -73;
+
+    ctx.fillStyle = '#f5eedf';
+    ctx.strokeStyle = '#c98a2a';
+    ctx.lineWidth = 1.2;
+    roundedRect(ctx, -bubbleWidth / 2, bubbleY, bubbleWidth, bubbleHeight, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(-4, bubbleY + bubbleHeight - 1);
+    ctx.lineTo(0, bubbleY + bubbleHeight + 7);
+    ctx.lineTo(4, bubbleY + bubbleHeight - 1);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#1b2430';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(enemy.shoutText, 0, bubbleY + bubbleHeight / 2 + 0.5);
+  } else if (chasing) {
     // Vykřičník nad jmenovkou.
     ctx.fillStyle = 'rgba(240, 107, 103, 0.96)';
     roundedRect(ctx, -7, -60, 14, 14, 4.5);
