@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1727">
+  <title>Školní hlídka | SŠ Čichnova</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game-app">
+    <header class="hud" aria-label="Herní panel">
+      <div class="brand-block">
+        <span class="school-mark" aria-hidden="true">SŠ</span>
+        <div class="brand-text">
+          <span class="eyebrow">Čichnova</span>
+          <strong>Školní hlídka</strong>
+        </div>
+      </div>
+
+      <section class="quest-card" aria-live="polite">
+        <div class="quest-heading">
+          <span class="quest-label">Aktuální úkol</span>
+          <span class="quest-floor" id="task-floor">Připraven ke startu</span>
+        </div>
+        <div class="quest-line">
+          <span class="quest-arrow" aria-hidden="true">→</span>
+          <strong id="task-name">—</strong>
+        </div>
+      </section>
+
+      <div class="hud-right">
+        <section class="floor-card" aria-label="Aktuální patro">
+          <span class="stat-label">Patro</span>
+          <div class="floor-pills" id="floor-pills"></div>
+        </section>
+
+        <section class="stats" aria-label="Statistiky">
+          <div class="stat">
+            <span class="stat-label">Splněno</span>
+            <strong id="stat-done">0</strong>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Čas</span>
+            <strong id="stat-time">00:00</strong>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Skóre</span>
+            <strong id="stat-score">0</strong>
+          </div>
+          <div class="stat stat-lives">
+            <span class="stat-label">Životy</span>
+            <div class="lives" id="lives" aria-label="3 životy"></div>
+          </div>
+        </section>
+      </div>
+    </header>
+
+    <div class="stage">
+      <canvas id="game" width="960" height="576"
+              aria-label="Půdorys školy. Pohybuj se pomocí WASD nebo šipek."></canvas>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+      <section class="overlay" id="start-screen" aria-labelledby="start-title">
+        <div class="overlay-card start-card">
+          <div class="kicker">SŠ Čichnova · první zvonění</div>
+          <h1 id="start-title">Školní <span>hlídka</span></h1>
+          <p class="intro">
+            Zvoní a ty máš na krku seznam úkolů. Přeběhni školu, najdi správnou
+            učebnu a vyhni se učitelům, kteří hlídají chodby.
+          </p>
+
+          <div class="how-to">
+            <div class="how-item">
+              <span class="how-number">01</span>
+              <div><strong>Pohyb</strong><span>WASD nebo šipky</span></div>
+            </div>
+            <div class="how-item">
+              <span class="how-number">02</span>
+              <div><strong>Cíl</strong><span>Vstup do zadané učebny</span></div>
+            </div>
+            <div class="how-item">
+              <span class="how-number">03</span>
+              <div><strong>Schody</strong><span>Na koncích chodby mění patro</span></div>
+            </div>
+            <div class="how-item">
+              <span class="how-number">04</span>
+              <div><strong>Učitelé</strong><span>Kontakt tě pošle zpět</span></div>
+            </div>
+            <div class="how-item how-item-wide">
+              <span class="how-number">05</span>
+              <div><strong>Odpadky</strong><span>Seber je na zemi, myší zamíř a klávesou E hoď. Učitele na chvíli zpomalíš.</span></div>
+            </div>
+          </div>
+
+          <p class="hint">
+            Tip: první číslice názvu učebny určuje patro. U18 je v 1. patře,
+            U48 ve 4. patře.
+          </p>
+
+          <button class="primary-button" id="start-button" type="button">
+            Začít výuku
+            <span aria-hidden="true">→</span>
+          </button>
+          <p class="tiny-note">Pauza: P · Schody tě posunou do dalšího patra (ze 4. zpět do 1.).</p>
+        </div>
+      </section>
+
+      <section class="overlay" id="pause-screen" aria-labelledby="pause-title" hidden>
+        <div class="overlay-card compact-card">
+          <div class="kicker">Přestávka</div>
+          <h1 id="pause-title">Pauza</h1>
+          <p class="intro">Zvonění přerušeno. Můžeš se nadechnout, učitelé čekají.</p>
+          <button class="primary-button" id="resume-button" type="button">
+            Pokračovat
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="overlay" id="gameover-screen" aria-labelledby="gameover-title" hidden>
+        <div class="overlay-card compact-card gameover-card">
+          <div class="kicker danger-kicker">Konec přestávky</div>
+          <h1 id="gameover-title">Chycen!</h1>
+          <p class="intro" id="gameover-reason">Učitel tě dostal na chodbě.</p>
+          <div class="final-stats" id="final-stats"></div>
+          <button class="primary-button" id="restart-button" type="button">
+            Zkusit znovu
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <footer class="controls">
+      <span><kbd>WASD</kbd> / <kbd>šipky</kbd> pohyb</span>
+      <span><kbd>E</kbd> hodit (mířeno myší)</span>
+      <span><kbd>P</kbd> pauza</span>
+      <div class="backpack" id="backpack" aria-label="Prázdný batoh" aria-live="polite">
+        <span class="backpack-label">Batoh</span>
+        <div class="backpack-slots" id="backpack-slots"></div>
+      </div>
+      <span class="controls-note">Cíl se rozsvítí, až budeš ve správném patře.</span>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
